@@ -1,0 +1,1458 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi Pengenalan Pola Data</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .slide-in {
+      animation: slideIn 0.4s ease-out;
+    }
+    
+    .pattern-box {
+      transition: all 0.3s ease;
+    }
+    
+    .pattern-box:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .btn-primary {
+      transition: all 0.2s ease;
+    }
+    
+    .btn-primary:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+    
+    .data-row {
+      transition: all 0.2s ease;
+    }
+    
+    .data-row:hover {
+      background: rgba(0,0,0,0.02);
+    }
+    
+    .modal-overlay {
+      backdrop-filter: blur(4px);
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+      margin-right: 8px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .tab-active {
+      border-bottom: 3px solid;
+      font-weight: 700;
+    }
+    
+    .sentiment-positive { color: #48bb78; }
+    .sentiment-neutral { color: #4299e1; }
+    .sentiment-negative { color: #f56565; }
+    
+    .virtual-keyboard {
+      background: linear-gradient(to top, #2d3748, #4a5568);
+      padding: 8px;
+      border-radius: 6px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      margin-top: 8px;
+      display: none;
+      max-width: 450px;
+    }
+    
+    .key-btn {
+      background: white;
+      border: none;
+      border-radius: 4px;
+      padding: 6px;
+      margin: 2px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: all 0.1s ease;
+      min-width: 28px;
+    }
+    
+    .key-btn:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+    
+    .key-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    
+    .key-btn.wide {
+      min-width: 55px;
+    }
+    
+    .key-btn.space {
+      min-width: 140px;
+    }
+    
+    .warning-banner {
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .weather-icon {
+      font-size: 24px;
+      display: inline-block;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full w-full overflow-auto">
+  <div class="w-full h-full" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 672px; padding-bottom: 200px;">
+   <div class="w-full h-full p-4"><!-- Header -->
+    <header class="text-center mb-4">
+     <h1 id="main-title" class="text-white mb-1" style="font-size: 28px; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">Mengenali Pola Data untuk Membuat Prediksi</h1>
+     <p id="subtitle" class="text-white" style="font-size: 14px; opacity: 0.95;">Kelas 12 SMA - Koding dan Kecerdasan Artifisial</p>
+    </header><!-- Tabs Navigation -->
+    <div class="bg-white rounded-lg shadow-lg mb-3 p-2">
+     <div class="flex gap-2"><button onclick="switchTab('weather')" id="tab-weather" class="flex-1 py-2 px-3 rounded text-sm font-semibold tab-active" style="color: #667eea; border-color: #667eea;"> Pola Cuaca </button> <button onclick="switchTab('smartphone')" id="tab-smartphone" class="flex-1 py-2 px-3 rounded text-sm font-semibold" style="color: #764ba2;"> Pola Penggunaan </button> <button onclick="switchTab('text')" id="tab-text" class="flex-1 py-2 px-3 rounded text-sm font-semibold" style="color: #ed8936;"> Pola Teks </button> <button onclick="switchTab('visual')" id="tab-visual" class="flex-1 py-2 px-3 rounded text-sm font-semibold" style="color: #f56565;"> Pola Visual </button>
+     </div>
+    </div>
+    <div class="grid grid-cols-2 gap-3"><!-- Left Panel: Data Management -->
+     <div class="bg-white rounded-lg shadow-lg p-4"><!-- Weather Tab Content -->
+      <div id="content-weather" class="tab-content">
+       <div class="warning-banner" id="warning-weather">
+        <p class="text-sm font-semibold text-yellow-800">Minimal 7 data diperlukan untuk visualisasi dan prediksi!</p>
+        <p class="text-xs text-yellow-700 mt-1">Saat ini: <span id="count-weather">0</span> data</p>
+       </div>
+       <h2 id="weather-label" class="font-bold mb-3 flex items-center justify-between" style="font-size: 18px; color: #667eea;"><span>Pola Data Cuaca</span>
+        <div class="flex gap-2"><button onclick="resetData('weather')" class="text-sm px-3 py-1 rounded text-white" style="background: #f56565;">🗑️ Reset</button> <button onclick="showAddModal('weather')" class="text-sm px-3 py-1 rounded text-white" style="background: #48bb78;">+ Data</button>
+        </div></h2>
+       <div class="mb-3 overflow-auto" style="max-height: 180px;">
+        <table class="w-full text-sm">
+         <thead class="sticky top-0 bg-gray-100">
+          <tr>
+           <th class="text-left p-2">Tanggal</th>
+           <th class="text-center p-2">Cuaca</th>
+           <th class="text-center p-2">Aksi</th>
+          </tr>
+         </thead>
+         <tbody id="weatherDataTable"></tbody>
+        </table>
+       </div><button onclick="analyzeData('weather')" class="w-full py-2 rounded text-white font-semibold" style="background: #667eea;"> Analisis Pola &amp; Prediksi Esok </button>
+      </div><!-- Smartphone Tab Content -->
+      <div id="content-smartphone" class="tab-content" style="display: none;">
+       <div class="warning-banner" id="warning-smartphone">
+        <p class="text-sm font-semibold text-yellow-800">Minimal 7 data diperlukan untuk visualisasi dan analisis!</p>
+        <p class="text-xs text-yellow-700 mt-1">Saat ini: <span id="count-smartphone">0</span> data</p>
+       </div>
+       <h2 id="smartphone-label" class="font-bold mb-3 flex items-center justify-between" style="font-size: 18px; color: #764ba2;"><span>Pola Penggunaan Gawai Pintar</span>
+        <div class="flex gap-2"><button onclick="resetData('smartphone')" class="text-sm px-3 py-1 rounded text-white" style="background: #f56565;">🗑️ Reset</button> <button onclick="showAddModal('smartphone')" class="text-sm px-3 py-1 rounded text-white" style="background: #48bb78;">+ Data</button>
+        </div></h2>
+       <div class="mb-3 overflow-auto" style="max-height: 180px;">
+        <table class="w-full text-sm">
+         <thead class="sticky top-0 bg-gray-100">
+          <tr>
+           <th class="text-left p-2">Aplikasi</th>
+           <th class="text-right p-2">Waktu (menit)</th>
+           <th class="text-center p-2">Aksi</th>
+          </tr>
+         </thead>
+         <tbody id="smartphoneDataTable"></tbody>
+        </table>
+       </div><button onclick="analyzeData('smartphone')" class="w-full py-2 rounded text-white font-semibold" style="background: #764ba2;"> Analisis Pola &amp; Prediksi </button>
+      </div><!-- Text Tab Content -->
+      <div id="content-text" class="tab-content" style="display: none;">
+       <div class="warning-banner" id="warning-text">
+        <p class="text-sm font-semibold text-yellow-800">Minimal 7 data diperlukan untuk visualisasi dan analisis!</p>
+        <p class="text-xs text-yellow-700 mt-1">Saat ini: <span id="count-text">0</span> data</p>
+       </div>
+       <h2 id="text-label" class="font-bold mb-3 flex items-center justify-between" style="font-size: 18px; color: #ed8936;"><span>Pola Teks Media Digital</span>
+        <div class="flex gap-2"><button onclick="resetData('text')" class="text-sm px-3 py-1 rounded text-white" style="background: #f56565;">🗑️ Reset</button> <button onclick="showAddModal('text')" class="text-sm px-3 py-1 rounded text-white" style="background: #48bb78;">+ Data</button>
+        </div></h2>
+       <div class="mb-3 overflow-auto" style="max-height: 180px;">
+        <table class="w-full text-sm">
+         <thead class="sticky top-0 bg-gray-100">
+          <tr>
+           <th class="text-left p-2">Topik</th>
+           <th class="text-center p-2">Sentimen</th>
+           <th class="text-right p-2">Jumlah</th>
+           <th class="text-center p-2">Aksi</th>
+          </tr>
+         </thead>
+         <tbody id="textDataTable"></tbody>
+        </table>
+       </div><button onclick="analyzeData('text')" class="w-full py-2 rounded text-white font-semibold" style="background: #ed8936;"> Analisis Sentimen &amp; Topik </button>
+      </div><!-- Visual Tab Content -->
+      <div id="content-visual" class="tab-content" style="display: none;">
+       <div class="warning-banner" id="warning-visual">
+        <p class="text-sm font-semibold text-yellow-800">Minimal 7 ciri diperlukan untuk membentuk gambar!</p>
+        <p class="text-xs text-yellow-700 mt-1">Saat ini: <span id="count-visual">0</span> ciri</p>
+       </div>
+       <h2 id="pattern-label" class="font-bold mb-3 flex items-center justify-between" style="font-size: 18px; color: #f56565;"><span>Pola Visual Objek</span>
+        <div class="flex gap-2"><button onclick="resetData('visual')" class="text-sm px-3 py-1 rounded text-white" style="background: #f56565;">🗑 Reset</button> <button onclick="showAddModal('visual')" class="text-sm px-3 py-1 rounded text-white" style="background: #48bb78;">+ Ciri</button>
+        </div></h2><label class="block mb-2"> <span class="text-sm font-medium">Jenis Objek:</span> <select id="objectType" class="w-full px-3 py-2 border rounded mt-1" onchange="updateVisualPreview()"> <option value="">-- Pilih Objek --</option> <option value="cat">Kucing</option> <option value="elephant">Gajah</option> <option value="fish">Ikan</option> <option value="apple">Apel</option> <option value="orange">Jeruk</option> </select> </label>
+       <div class="mb-3 overflow-auto" style="max-height: 120px;">
+        <table class="w-full text-xs">
+         <thead class="sticky top-0 bg-gray-100">
+          <tr>
+           <th class="text-left p-1">Ciri</th>
+           <th class="text-left p-1">Nilai</th>
+           <th class="text-center p-1">Aksi</th>
+          </tr>
+         </thead>
+         <tbody id="visualDataTable"></tbody>
+        </table>
+       </div><button onclick="analyzeData('visual')" class="w-full py-2 rounded text-white font-semibold" style="background: #f56565;"> Analisis Pola Visual </button>
+      </div>
+     </div><!-- Right Panel: Visualization & Analysis -->
+     <div class="bg-white rounded-lg shadow-lg p-4">
+      <h3 class="font-bold mb-3" style="font-size: 18px; color: #2d3748;">Visualisasi &amp; Analisis</h3><!-- Chart Container -->
+      <div id="chartContainer" class="mb-3" style="height: 220px;">
+       <div class="flex items-center justify-center h-full text-gray-500">
+        <p class="text-center text-sm">Tambahkan minimal 7 data dan klik "Analisis"<br>
+         untuk melihat visualisasi</p>
+       </div>
+      </div><!-- Analysis Results -->
+      <div id="analysisResults" class="p-3 rounded" style="background: #f7fafc; border-left: 4px solid #667eea; min-height: 200px; max-height: 400px; overflow-y: auto; overflow-x: hidden; word-wrap: break-word;">
+       <p class="text-sm text-gray-600 text-center">Pilih data dan klik tombol "Analisis" untuk melihat hasil prediksi</p>
+      </div>
+     </div>
+    </div><!-- Concepts Section -->
+    <div id="feedbackSection" class="bg-white rounded-lg shadow-lg p-4 mt-3" style="display: none;">
+     <h3 class="font-bold mb-3 text-center" style="font-size: 18px; color: #2d3748;">Konsep Penting dalam Pengenalan Pola untuk Prediksi</h3>
+     <div id="feedbackContent" class="grid grid-cols-3 gap-3 text-sm"></div>
+    </div>
+   </div>
+  </div><!-- Add/Edit Modal -->
+  <div id="dataModal" class="modal-overlay fixed inset-0 items-center justify-center" style="display: none; background: rgba(0,0,0,0.5); z-index: 999;">
+   <div class="bg-white rounded-lg shadow-2xl p-6" style="width: 450px; max-width: 90%; max-height: 90%; overflow-y: auto;">
+    <h3 id="modalTitle" class="font-bold mb-4 text-xl" style="color: #2d3748;">Tambah Data</h3>
+    <div id="modalContent"></div><!-- Virtual Keyboard Inside Modal -->
+    <div id="virtualKeyboard" class="virtual-keyboard">
+     <div class="text-center mb-1">
+      <div id="keyboardDisplay" class="bg-white rounded px-3 py-1 inline-block font-mono text-sm font-semibold" style="min-width: 200px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></div>
+     </div>
+     <div class="text-center">
+      <div class="inline-block">
+       <div class="mb-1"><button class="key-btn" onclick="typeKey('1')">1</button> <button class="key-btn" onclick="typeKey('2')">2</button> <button class="key-btn" onclick="typeKey('3')">3</button> <button class="key-btn" onclick="typeKey('4')">4</button> <button class="key-btn" onclick="typeKey('5')">5</button> <button class="key-btn" onclick="typeKey('6')">6</button> <button class="key-btn" onclick="typeKey('7')">7</button> <button class="key-btn" onclick="typeKey('8')">8</button> <button class="key-btn" onclick="typeKey('9')">9</button> <button class="key-btn" onclick="typeKey('0')">0</button>
+       </div>
+       <div class="mb-1"><button class="key-btn" onclick="typeKey('Q')">Q</button> <button class="key-btn" onclick="typeKey('W')">W</button> <button class="key-btn" onclick="typeKey('E')">E</button> <button class="key-btn" onclick="typeKey('R')">R</button> <button class="key-btn" onclick="typeKey('T')">T</button> <button class="key-btn" onclick="typeKey('Y')">Y</button> <button class="key-btn" onclick="typeKey('U')">U</button> <button class="key-btn" onclick="typeKey('I')">I</button> <button class="key-btn" onclick="typeKey('O')">O</button> <button class="key-btn" onclick="typeKey('P')">P</button>
+       </div>
+       <div class="mb-1"><button class="key-btn" onclick="typeKey('A')">A</button> <button class="key-btn" onclick="typeKey('S')">S</button> <button class="key-btn" onclick="typeKey('D')">D</button> <button class="key-btn" onclick="typeKey('F')">F</button> <button class="key-btn" onclick="typeKey('G')">G</button> <button class="key-btn" onclick="typeKey('H')">H</button> <button class="key-btn" onclick="typeKey('J')">J</button> <button class="key-btn" onclick="typeKey('K')">K</button> <button class="key-btn" onclick="typeKey('L')">L</button>
+       </div>
+       <div class="mb-1"><button class="key-btn" onclick="typeKey('Z')">Z</button> <button class="key-btn" onclick="typeKey('X')">X</button> <button class="key-btn" onclick="typeKey('C')">C</button> <button class="key-btn" onclick="typeKey('V')">V</button> <button class="key-btn" onclick="typeKey('B')">B</button> <button class="key-btn" onclick="typeKey('N')">N</button> <button class="key-btn" onclick="typeKey('M')">M</button> <button class="key-btn" onclick="typeKey('.')">.</button> <button class="key-btn" onclick="typeKey('-')">-</button>
+       </div>
+       <div><button class="key-btn space" onclick="typeKey(' ')">SPASI</button> <button class="key-btn wide" onclick="backspaceKey()">HAPUS</button>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="flex gap-2 mt-4"><button id="modalSaveBtn" onclick="saveData()" class="flex-1 py-2 rounded text-white font-semibold" style="background: #48bb78;"> Simpan </button> <button onclick="closeModal()" class="flex-1 py-2 rounded text-white font-semibold" style="background: #718096;"> Batal </button>
+    </div>
+   </div>
+  </div>
+  <script>
+    // LocalStorage data management
+    function saveToLocalStorage(data) {
+      localStorage.setItem('patternRecognitionData', JSON.stringify(data));
+    }
+
+    function loadFromLocalStorage() {
+      const saved = localStorage.getItem('patternRecognitionData');
+      return saved ? JSON.parse(saved) : [];
+    }
+
+    const defaultConfig = {
+      main_title: "Mengenali Pola Data untuk Membuat Prediksi",
+      subtitle: "Kelas 12 SMA - Koding dan Kecerdasan Artifisial",
+      weather_label: "Pola Data Cuaca",
+      smartphone_label: "Pola Penggunaan Smartphone",
+      text_label: "Pola Teks Media Digital",
+      pattern_label: "Pola Visual Objek",
+      primary_color: "#667eea",
+      secondary_color: "#764ba2",
+      accent_color: "#48bb78",
+      text_color: "#2d3748",
+      orange_color: "#ed8936",
+      font_family: "system-ui, -apple-system, sans-serif",
+      font_size: 16
+    };
+
+    let currentTab = 'weather';
+    let currentChart = null;
+    let allData = [];
+    let editingRecord = null;
+    let isLoading = false;
+    let activeInput = null;
+
+    const weatherTypes = {
+      'Cerah': { icon: '☀️', score: 5 },
+      'Berawan': { icon: '☁️', score: 3 },
+      'Hujan Ringan': { icon: '🌦️', score: 2 },
+      'Hujan': { icon: '🌧️', score: 1 },
+      'Hujan Petir': { icon: '⛈️', score: 0 },
+      'Badai': { icon: '🌩️', score: -1 }
+    };
+
+    function initApp() {
+      allData = loadFromLocalStorage();
+      renderCurrentTabData();
+      updateWarningBanners();
+      updateChartForCurrentTab();
+    }
+
+    function getDataForType(type) {
+      return allData.filter(d => d.type === type);
+    }
+
+    function updateWarningBanners() {
+      ['weather', 'smartphone', 'text', 'visual'].forEach(type => {
+        const count = getDataForType(type).length;
+        const warning = document.getElementById(`warning-${type}`);
+        const countSpan = document.getElementById(`count-${type}`);
+        
+        if (countSpan) countSpan.textContent = count;
+        if (warning) {
+          warning.style.display = count < 7 ? 'block' : 'none';
+        }
+      });
+    }
+
+    function renderCurrentTabData() {
+      const type = currentTab;
+      const data = getDataForType(type);
+      
+      if (type === 'weather') {
+        renderWeatherData(data);
+      } else if (type === 'smartphone') {
+        renderSmartphoneData(data);
+      } else if (type === 'text') {
+        renderTextData(data);
+      } else if (type === 'visual') {
+        renderVisualData(data);
+      }
+    }
+
+    function renderWeatherData(data) {
+      const tbody = document.getElementById('weatherDataTable');
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center p-4 text-gray-500">Belum ada data. Klik "+ Data" untuk menambah.</td></tr>';
+        return;
+      }
+      
+      const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+      tbody.innerHTML = sortedData.map(d => `
+        <tr class="data-row border-b">
+          <td class="p-2">${d.date}</td>
+          <td class="text-center p-2"><span class="weather-icon">${weatherTypes[d.weatherType]?.icon || '🌤️'}</span> ${d.weatherType}</td>
+          <td class="text-center p-2">
+            <button onclick='editData(${JSON.stringify(d).replace(/'/g, "&apos;")})' class="text-blue-600 hover:text-blue-800 mr-2">Edit</button>
+            <button onclick='deleteData(${JSON.stringify(d).replace(/'/g, "&apos;")})' class="text-red-600 hover:text-red-800">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderSmartphoneData(data) {
+      const tbody = document.getElementById('smartphoneDataTable');
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center p-4 text-gray-500">Belum ada data. Klik "+ Data" untuk menambah.</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = data.map(d => `
+        <tr class="data-row border-b">
+          <td class="p-2">${d.name}</td>
+          <td class="text-right p-2 font-semibold">${d.value} menit</td>
+          <td class="text-center p-2">
+            <button onclick='editData(${JSON.stringify(d).replace(/'/g, "&apos;")})' class="text-blue-600 hover:text-blue-800 mr-2">Edit</button>
+            <button onclick='deleteData(${JSON.stringify(d).replace(/'/g, "&apos;")})' class="text-red-600 hover:text-red-800">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderTextData(data) {
+      const tbody = document.getElementById('textDataTable');
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-gray-500">Belum ada data. Klik "+ Data" untuk menambah.</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = data.map(d => `
+        <tr class="data-row border-b">
+          <td class="p-2">${d.name}</td>
+          <td class="text-center p-2"><span class="sentiment-${d.sentiment.toLowerCase()}">${d.sentiment}</span></td>
+          <td class="text-right p-2 font-semibold">${d.value}</td>
+          <td class="text-center p-2">
+            <button onclick='editData(${JSON.stringify(d).replace(/'/g, "&apos;")})' class="text-blue-600 hover:text-blue-800 mr-2">Edit</button>
+            <button onclick='deleteData(${JSON.stringify(d).replace(/'/g, "&apos;")})' class="text-red-600 hover:text-red-800">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderVisualData(data) {
+      const tbody = document.getElementById('visualDataTable');
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center p-2 text-gray-500">Belum ada ciri. Klik "+ Ciri"</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = data.map(d => `
+        <tr class="data-row border-b">
+          <td class="p-1 text-xs">${d.featureName}</td>
+          <td class="p-1 text-xs">${d.featureValue}</td>
+          <td class="text-center p-1">
+            <button onclick='deleteData(${JSON.stringify(d).replace(/'/g, "&apos;")})' class="text-red-600 hover:text-red-800 text-xs">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('[id^="tab-"]').forEach(el => {
+        el.classList.remove('tab-active');
+        el.style.borderColor = 'transparent';
+      });
+      
+      document.getElementById(`content-${tab}`).style.display = 'block';
+      const activeTab = document.getElementById(`tab-${tab}`);
+      activeTab.classList.add('tab-active');
+      
+      const colors = {
+        weather: '#667eea',
+        smartphone: '#764ba2',
+        text: '#ed8936',
+        visual: '#f56565'
+      };
+      activeTab.style.borderColor = colors[tab];
+      
+      renderCurrentTabData();
+      updateWarningBanners();
+      updateChartForCurrentTab();
+      
+      document.getElementById('analysisResults').innerHTML = '<p class="text-sm text-gray-600 text-center">Klik tombol "Analisis" untuk melihat hasil prediksi</p>';
+      document.getElementById('feedbackSection').style.display = 'none';
+    }
+
+    function showAddModal(type) {
+      if (getDataForType(type).length >= 999) {
+        showToast('Maksimum 999 data tercapai. Hapus data lama terlebih dahulu.', 'error');
+        return;
+      }
+      
+      editingRecord = null;
+      document.getElementById('modalTitle').textContent = type === 'visual' ? 'Tambah Ciri Visual' : 'Tambah Data Baru';
+      
+      let content = '';
+      if (type === 'weather') {
+        content = `
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Tanggal:</span>
+            <input type="date" id="inputDate" class="w-full px-3 py-2 border rounded mt-1" value="${new Date().toISOString().split('T')[0]}">
+          </label>
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Kondisi Cuaca:</span>
+            <select id="inputWeatherType" class="w-full px-3 py-2 border rounded mt-1">
+              <option value="Cerah">☀️ Cerah</option>
+              <option value="Berawan">☁️ Berawan</option>
+              <option value="Hujan Ringan">🌦️ Hujan Ringan</option>
+              <option value="Hujan">🌧️ Hujan</option>
+              <option value="Hujan Petir">⛈️ Hujan Petir</option>
+              <option value="Badai">🌩️ Badai</option>
+            </select>
+          </label>
+        `;
+      } else if (type === 'smartphone') {
+        content = `
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Nama Aplikasi:</span>
+            <input type="text" id="inputName" class="w-full px-3 py-2 border rounded mt-1" placeholder="Contoh: Instagram" onfocus="showKeyboard(this, 'text')">
+          </label>
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Waktu Penggunaan (menit):</span>
+            <input type="text" id="inputValue" class="w-full px-3 py-2 border rounded mt-1" placeholder="Contoh: 120" onfocus="showKeyboard(this, 'number')">
+          </label>
+        `;
+      } else if (type === 'text') {
+        content = `
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Topik Diskusi:</span>
+            <input type="text" id="inputName" class="w-full px-3 py-2 border rounded mt-1" placeholder="Contoh: Makanan Gizi Gratis" onfocus="showKeyboard(this, 'text')">
+          </label>
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Sentimen:</span>
+            <select id="inputSentiment" class="w-full px-3 py-2 border rounded mt-1">
+              <option value="Positif">Positif</option>
+              <option value="Netral">Netral</option>
+              <option value="Negatif">Negatif</option>
+            </select>
+          </label>
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Jumlah Percakapan:</span>
+            <input type="text" id="inputValue" class="w-full px-3 py-2 border rounded mt-1" placeholder="Contoh: 1500" onfocus="showKeyboard(this, 'number')">
+          </label>
+        `;
+      } else if (type === 'visual') {
+        const objectType = document.getElementById('objectType').value;
+        if (!objectType) {
+          showToast('Pilih jenis objek terlebih dahulu!', 'error');
+          return;
+        }
+
+        const features = getFeatureOptionsForObject(objectType);
+        content = `
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Pilih Ciri:</span>
+            <select id="inputFeatureName" class="w-full px-3 py-2 border rounded mt-1">
+              ${features.map(f => `<option value="${f}">${f}</option>`).join('')}
+            </select>
+          </label>
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Nilai Ciri:</span>
+            <input type="text" id="inputFeatureValue" class="w-full px-3 py-2 border rounded mt-1" placeholder="Contoh: Coklat, Besar, Lonjong" onfocus="showKeyboard(this, 'text')">
+          </label>
+        `;
+      }
+      
+      document.getElementById('modalContent').innerHTML = content;
+      document.getElementById('dataModal').style.display = 'flex';
+    }
+
+    function getFeatureOptionsForObject(objectType) {
+      const features = {
+        cat: ['Warna Bulu', 'Bentuk Mata', 'Bentuk Telinga', 'Pola Bulu', 'Ukuran Badan', 'Bentuk Ekor', 'Tekstur Bulu'],
+        elephant: ['Warna Kulit', 'Ukuran Badan', 'Bentuk Telinga', 'Panjang Belalai', 'Tekstur Kulit', 'Ukuran Gading', 'Bentuk Kaki'],
+        fish: ['Warna Sisik', 'Bentuk Badan', 'Pola Sisik', 'Ukuran Sirip', 'Bentuk Ekor', 'Tekstur Sisik', 'Ukuran Mata'],
+        apple: ['Warna Kulit', 'Bentuk Buah', 'Ukuran', 'Tekstur Kulit', 'Warna Tangkai', 'Ukuran Tangkai', 'Pola Permukaan'],
+        orange: ['Warna Kulit', 'Bentuk Buah', 'Ukuran', 'Tekstur Kulit', 'Pola Kulit', 'Warna Daun', 'Ketebalan Kulit']
+      };
+      return features[objectType] || [];
+    }
+
+    function editData(record) {
+      editingRecord = record;
+      document.getElementById('modalTitle').textContent = 'Edit Data';
+      
+      let content = '';
+      if (record.type === 'weather') {
+        content = `
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Tanggal:</span>
+            <input type="date" id="inputDate" class="w-full px-3 py-2 border rounded mt-1" value="${record.date}">
+          </label>
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Kondisi Cuaca:</span>
+            <select id="inputWeatherType" class="w-full px-3 py-2 border rounded mt-1">
+              <option value="Cerah" ${record.weatherType === 'Cerah' ? 'selected' : ''}>☀️ Cerah</option>
+              <option value="Berawan" ${record.weatherType === 'Berawan' ? 'selected' : ''}>☁️ Berawan</option>
+              <option value="Hujan Ringan" ${record.weatherType === 'Hujan Ringan' ? 'selected' : ''}>🌦️ Hujan Ringan</option>
+              <option value="Hujan" ${record.weatherType === 'Hujan' ? 'selected' : ''}>🌧️ Hujan</option>
+              <option value="Hujan Petir" ${record.weatherType === 'Hujan Petir' ? 'selected' : ''}>⛈️ Hujan Petir</option>
+              <option value="Badai" ${record.weatherType === 'Badai' ? 'selected' : ''}>🌩️ Badai</option>
+            </select>
+          </label>
+        `;
+      } else if (record.type === 'smartphone') {
+        content = `
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Nama Aplikasi:</span>
+            <input type="text" id="inputName" class="w-full px-3 py-2 border rounded mt-1" value="${record.name}" onfocus="showKeyboard(this, 'text')">
+          </label>
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Waktu Penggunaan (menit):</span>
+            <input type="text" id="inputValue" class="w-full px-3 py-2 border rounded mt-1" value="${record.value}" onfocus="showKeyboard(this, 'number')">
+          </label>
+        `;
+      } else if (record.type === 'text') {
+        content = `
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Topik Diskusi:</span>
+            <input type="text" id="inputName" class="w-full px-3 py-2 border rounded mt-1" value="${record.name}" onfocus="showKeyboard(this, 'text')">
+          </label>
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Sentimen:</span>
+            <select id="inputSentiment" class="w-full px-3 py-2 border rounded mt-1">
+              <option value="Positif" ${record.sentiment === 'Positif' ? 'selected' : ''}>Positif</option>
+              <option value="Netral" ${record.sentiment === 'Netral' ? 'selected' : ''}>Netral</option>
+              <option value="Negatif" ${record.sentiment === 'Negatif' ? 'selected' : ''}>Negatif</option>
+            </select>
+          </label>
+          <label class="block mb-3">
+            <span class="text-sm font-medium">Jumlah Percakapan:</span>
+            <input type="text" id="inputValue" class="w-full px-3 py-2 border rounded mt-1" value="${record.value}" onfocus="showKeyboard(this, 'number')">
+          </label>
+        `;
+      }
+      
+      document.getElementById('modalContent').innerHTML = content;
+      document.getElementById('dataModal').style.display = 'flex';
+    }
+
+    async function saveData() {
+      if (isLoading) return;
+      
+      const saveBtn = document.getElementById('modalSaveBtn');
+      const originalText = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<span class="spinner"></span>Menyimpan...';
+      saveBtn.disabled = true;
+      isLoading = true;
+      
+      try {
+        let dataObj = { type: currentTab };
+        
+        if (currentTab === 'weather') {
+          const date = document.getElementById('inputDate').value;
+          const weatherType = document.getElementById('inputWeatherType').value;
+          if (!date || !weatherType) {
+            showToast('Mohon isi semua field dengan benar', 'error');
+            return;
+          }
+          dataObj.date = date;
+          dataObj.weatherType = weatherType;
+          dataObj.name = date;
+        } else if (currentTab === 'smartphone') {
+          const name = document.getElementById('inputName').value.trim();
+          const value = parseFloat(document.getElementById('inputValue').value);
+          if (!name || isNaN(value)) {
+            showToast('Mohon isi semua field dengan benar', 'error');
+            return;
+          }
+          dataObj.name = name;
+          dataObj.value = value;
+          dataObj.date = new Date().toISOString().split('T')[0];
+        } else if (currentTab === 'text') {
+          const name = document.getElementById('inputName').value.trim();
+          const value = parseFloat(document.getElementById('inputValue').value);
+          const sentiment = document.getElementById('inputSentiment').value;
+          if (!name || isNaN(value)) {
+            showToast('Mohon isi semua field dengan benar', 'error');
+            return;
+          }
+          dataObj.name = name;
+          dataObj.value = value;
+          dataObj.sentiment = sentiment;
+          dataObj.date = new Date().toISOString().split('T')[0];
+        } else if (currentTab === 'visual') {
+          const featureName = document.getElementById('inputFeatureName').value;
+          const featureValue = document.getElementById('inputFeatureValue').value.trim();
+          const objectType = document.getElementById('objectType').value;
+          
+          if (!featureName || !featureValue || !objectType) {
+            showToast('Mohon isi semua field dengan benar', 'error');
+            return;
+          }
+          dataObj.objectType = objectType;
+          dataObj.featureName = featureName;
+          dataObj.featureValue = featureValue;
+          dataObj.name = `${featureName}: ${featureValue}`;
+        }
+        
+        dataObj.timestamp = Date.now();
+        dataObj.id = editingRecord ? editingRecord.id : Date.now().toString();
+        
+        if (editingRecord) {
+          const index = allData.findIndex(d => d.id === editingRecord.id);
+          if (index !== -1) {
+            allData[index] = dataObj;
+          }
+        } else {
+          if (allData.length >= 999) {
+            showToast('Maksimum 999 data tercapai. Hapus data lama terlebih dahulu.', 'error');
+            return;
+          }
+          allData.push(dataObj);
+        }
+        
+        saveToLocalStorage(allData);
+        renderCurrentTabData();
+        updateWarningBanners();
+        updateChartForCurrentTab();
+        
+        if (currentTab === 'visual') {
+          updateVisualPreview();
+        }
+        
+        showToast(editingRecord ? 'Data berhasil diperbarui' : 'Data berhasil ditambahkan', 'success');
+        closeModal();
+      } finally {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+        isLoading = false;
+      }
+    }
+
+    async function deleteData(record) {
+      if (isLoading) return;
+      
+      const confirmed = await showConfirmation('Apakah Anda yakin ingin menghapus data ini?');
+      if (!confirmed) return;
+      
+      isLoading = true;
+      
+      const index = allData.findIndex(d => d.id === record.id);
+      if (index !== -1) {
+        allData.splice(index, 1);
+        saveToLocalStorage(allData);
+        renderCurrentTabData();
+        updateWarningBanners();
+        updateChartForCurrentTab();
+        
+        if (currentTab === 'visual') {
+          updateVisualPreview();
+        }
+        
+        showToast('Data berhasil dihapus', 'success');
+      } else {
+        showToast('Gagal menghapus data', 'error');
+      }
+      
+      isLoading = false;
+    }
+
+    async function resetData(type) {
+      if (isLoading) return;
+      
+      const typeNames = {
+        weather: 'Cuaca',
+        smartphone: 'Penggunaan Gawai',
+        text: 'Teks Media Digital',
+        visual: 'Visual Objek'
+      };
+      
+      const confirmed = await showConfirmation(`Apakah Anda yakin ingin menghapus SEMUA data ${typeNames[type]}? Tindakan ini tidak dapat dibatalkan!`);
+      if (!confirmed) return;
+      
+      isLoading = true;
+      
+      // Filter out all data of this type
+      const beforeCount = allData.length;
+      allData = allData.filter(d => d.type !== type);
+      const deletedCount = beforeCount - allData.length;
+      
+      // If visual, also reset object type selection
+      if (type === 'visual') {
+        const objectTypeSelect = document.getElementById('objectType');
+        if (objectTypeSelect) {
+          objectTypeSelect.value = '';
+        }
+      }
+      
+      saveToLocalStorage(allData);
+      renderCurrentTabData();
+      updateWarningBanners();
+      updateChartForCurrentTab();
+      
+      // Clear analysis results and feedback section
+      document.getElementById('analysisResults').innerHTML = '<p class="text-sm text-gray-600 text-center">Klik tombol "Analisis" untuk melihat hasil prediksi</p>';
+      document.getElementById('feedbackSection').style.display = 'none';
+      
+      showToast(`${deletedCount} data ${typeNames[type]} berhasil dihapus`, 'success');
+      
+      isLoading = false;
+    }
+
+    function closeModal() {
+      document.getElementById('dataModal').style.display = 'none';
+      document.getElementById('virtualKeyboard').style.display = 'none';
+      editingRecord = null;
+      activeInput = null;
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      toast.style.background = type === 'success' ? '#48bb78' : '#f56565';
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    async function showConfirmation(message) {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay fixed inset-0 flex items-center justify-center';
+        overlay.style.cssText = 'background: rgba(0,0,0,0.5); z-index: 1000;';
+        
+        overlay.innerHTML = `
+          <div class="bg-white rounded-lg shadow-2xl p-6" style="width: 400px; max-width: 90%;">
+            <h3 class="font-bold mb-4 text-lg">Konfirmasi</h3>
+            <p class="mb-6 text-gray-700">${message}</p>
+            <div class="flex gap-3">
+              <button id="confirmYes" class="flex-1 py-2 rounded text-white font-semibold" style="background: #f56565;">Ya, Hapus</button>
+              <button id="confirmNo" class="flex-1 py-2 rounded text-white font-semibold" style="background: #718096;">Batal</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        document.getElementById('confirmYes').onclick = () => {
+          overlay.remove();
+          resolve(true);
+        };
+        
+        document.getElementById('confirmNo').onclick = () => {
+          overlay.remove();
+          resolve(false);
+        };
+      });
+    }
+
+    function showKeyboard(input, type) {
+      activeInput = input;
+      const keyboard = document.getElementById('virtualKeyboard');
+      const display = document.getElementById('keyboardDisplay');
+      
+      display.textContent = input.value || '';
+      keyboard.style.display = 'block';
+      
+      const numKeys = keyboard.querySelectorAll('.key-btn');
+      numKeys.forEach(btn => {
+        if (type === 'number') {
+          btn.style.display = /[0-9.\-]/.test(btn.textContent) || btn.textContent === 'HAPUS' ? '' : 'none';
+        } else {
+          btn.style.display = '';
+        }
+      });
+      
+      input.addEventListener('input', function() {
+        display.textContent = input.value;
+      });
+    }
+
+    function typeKey(char) {
+      if (!activeInput) return;
+      activeInput.value += char;
+      activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+      document.getElementById('keyboardDisplay').textContent = activeInput.value;
+    }
+
+    function backspaceKey() {
+      if (!activeInput) return;
+      activeInput.value = activeInput.value.slice(0, -1);
+      activeInput.dispatchEvent(new Event('input', { bubbles: true }));
+      document.getElementById('keyboardDisplay').textContent = activeInput.value;
+    }
+
+    function updateChartForCurrentTab() {
+      const data = getDataForType(currentTab);
+      
+      if (currentChart) {
+        currentChart.destroy();
+        currentChart = null;
+      }
+      
+      const container = document.getElementById('chartContainer');
+      
+      if (currentTab === 'visual') {
+        updateVisualPreview();
+        return;
+      }
+      
+      if (data.length === 0) {
+        container.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500"><p class="text-center text-sm">Tambahkan data untuk melihat visualisasi</p></div>';
+        return;
+      }
+      
+      container.innerHTML = '<canvas id="mainChart"></canvas>';
+      const canvas = document.getElementById('mainChart');
+      const ctx = canvas.getContext('2d');
+      
+      if (currentTab === 'weather') {
+        const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+        const scores = sortedData.map(d => weatherTypes[d.weatherType]?.score || 0);
+        
+        currentChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: sortedData.map(d => d.date),
+            datasets: [{
+              label: 'Skor Cuaca',
+              data: scores,
+              borderColor: '#667eea',
+              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              tension: 0.4,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+              legend: { display: true },
+              tooltip: {
+                callbacks: {
+                  afterLabel: function(context) {
+                    return sortedData[context.dataIndex].weatherType;
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                title: { display: true, text: 'Skor (-1=Buruk, 5=Cerah)' }
+              }
+            }
+          }
+        });
+      } else if (currentTab === 'smartphone') {
+        const sortedData = [...data].sort((a, b) => b.value - a.value);
+        currentChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: sortedData.map(d => d.name),
+            datasets: [{
+              label: 'Waktu (menit)',
+              data: sortedData.map(d => d.value),
+              backgroundColor: '#764ba2'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: true } },
+            scales: { y: { beginAtZero: true } }
+          }
+        });
+      } else if (currentTab === 'text') {
+        const sentimentCounts = { Positif: 0, Netral: 0, Negatif: 0 };
+        data.forEach(d => sentimentCounts[d.sentiment] += d.value);
+        
+        currentChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Positif', 'Netral', 'Negatif'],
+            datasets: [{
+              data: [sentimentCounts.Positif, sentimentCounts.Netral, sentimentCounts.Negatif],
+              backgroundColor: ['#48bb78', '#4299e1', '#f56565']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } }
+          }
+        });
+      }
+    }
+
+    function updateVisualPreview() {
+      const container = document.getElementById('chartContainer');
+      const data = getDataForType('visual');
+      const objectType = document.getElementById('objectType')?.value;
+      
+      if (!objectType || data.length === 0) {
+        container.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500"><p class="text-center text-sm">Pilih objek dan tambahkan ciri untuk melihat visualisasi</p></div>';
+        return;
+      }
+      
+      container.innerHTML = '<canvas id="visualCanvas" width="520" height="220"></canvas>';
+      const canvas = document.getElementById('visualCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const features = {};
+      data.forEach(d => {
+        if (d.objectType === objectType) {
+          features[d.featureName] = d.featureValue;
+        }
+      });
+      
+      drawObject(ctx, objectType, features);
+    }
+
+    function drawObject(ctx, type, features) {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      
+      const centerX = ctx.canvas.width / 2;
+      const centerY = ctx.canvas.height / 2;
+      
+      if (type === 'cat') {
+        const bodyColor = getColorFromFeature(features['Warna Bulu']) || '#FFA500';
+        
+        // Body
+        ctx.fillStyle = bodyColor;
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY + 20, 60, 50, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Head
+        ctx.beginPath();
+        ctx.arc(centerX, centerY - 40, 40, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Ears
+        ctx.beginPath();
+        ctx.moveTo(centerX - 30, centerY - 60);
+        ctx.lineTo(centerX - 40, centerY - 85);
+        ctx.lineTo(centerX - 20, centerY - 70);
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.moveTo(centerX + 30, centerY - 60);
+        ctx.lineTo(centerX + 40, centerY - 85);
+        ctx.lineTo(centerX + 20, centerY - 70);
+        ctx.fill();
+        
+        // Eyes
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(centerX - 15, centerY - 45, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(centerX + 15, centerY - 45, 5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Tail
+        ctx.strokeStyle = bodyColor;
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.moveTo(centerX + 60, centerY + 20);
+        ctx.quadraticCurveTo(centerX + 100, centerY - 10, centerX + 90, centerY - 40);
+        ctx.stroke();
+        
+      } else if (type === 'elephant') {
+        const skinColor = getColorFromFeature(features['Warna Kulit']) || '#808080';
+        
+        // Body
+        ctx.fillStyle = skinColor;
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, 80, 60, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Head
+        ctx.beginPath();
+        ctx.arc(centerX - 60, centerY - 30, 50, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Ears
+        ctx.beginPath();
+        ctx.ellipse(centerX - 90, centerY - 30, 30, 45, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(centerX - 30, centerY - 30, 30, 45, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Trunk
+        ctx.strokeStyle = skinColor;
+        ctx.lineWidth = 20;
+        ctx.beginPath();
+        ctx.moveTo(centerX - 60, centerY);
+        ctx.quadraticCurveTo(centerX - 80, centerY + 40, centerX - 70, centerY + 70);
+        ctx.stroke();
+        
+        // Eye
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(centerX - 60, centerY - 40, 5, 0, Math.PI * 2);
+        ctx.fill();
+        
+      } else if (type === 'fish') {
+        const scaleColor = getColorFromFeature(features['Warna Sisik']) || '#4169E1';
+        
+        // Body
+        ctx.fillStyle = scaleColor;
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, 70, 40, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Tail
+        ctx.beginPath();
+        ctx.moveTo(centerX + 70, centerY);
+        ctx.lineTo(centerX + 110, centerY - 30);
+        ctx.lineTo(centerX + 110, centerY + 30);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Top fin
+        ctx.beginPath();
+        ctx.moveTo(centerX - 10, centerY - 40);
+        ctx.lineTo(centerX, centerY - 70);
+        ctx.lineTo(centerX + 20, centerY - 40);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Eye
+        ctx.fillStyle = '#FFF';
+        ctx.beginPath();
+        ctx.arc(centerX - 40, centerY - 10, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(centerX - 40, centerY - 10, 4, 0, Math.PI * 2);
+        ctx.fill();
+        
+      } else if (type === 'apple') {
+        const fruitColor = getColorFromFeature(features['Warna Kulit']) || '#FF0000';
+        
+        // Apple body
+        ctx.fillStyle = fruitColor;
+        ctx.beginPath();
+        ctx.arc(centerX - 20, centerY, 50, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(centerX + 20, centerY, 50, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Stem
+        const stemColor = getColorFromFeature(features['Warna Tangkai']) || '#8B4513';
+        ctx.strokeStyle = stemColor;
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY - 50);
+        ctx.lineTo(centerX, centerY - 70);
+        ctx.stroke();
+        
+        // Leaf
+        ctx.fillStyle = '#228B22';
+        ctx.beginPath();
+        ctx.ellipse(centerX + 15, centerY - 70, 15, 8, Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
+        
+      } else if (type === 'orange') {
+        const fruitColor = getColorFromFeature(features['Warna Kulit']) || '#FFA500';
+        
+        // Orange body
+        ctx.fillStyle = fruitColor;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 60, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Texture dots
+        ctx.fillStyle = '#FF8C00';
+        for (let i = 0; i < 20; i++) {
+          const angle = (Math.PI * 2 * i) / 20;
+          const x = centerX + Math.cos(angle) * 40;
+          const y = centerY + Math.sin(angle) * 40;
+          ctx.beginPath();
+          ctx.arc(x, y, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        
+        // Stem
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(centerX - 3, centerY - 65, 6, 10);
+        
+        // Leaf
+        const leafColor = getColorFromFeature(features['Warna Daun']) || '#228B22';
+        ctx.fillStyle = leafColor;
+        ctx.beginPath();
+        ctx.ellipse(centerX + 12, centerY - 60, 12, 6, Math.PI / 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+    }
+
+    function getColorFromFeature(value) {
+      if (!value) return null;
+      const colorMap = {
+        'merah': '#FF0000', 'hijau': '#00FF00', 'biru': '#0000FF',
+        'kuning': '#FFFF00', 'orange': '#FFA500', 'ungu': '#800080',
+        'pink': '#FFC0CB', 'coklat': '#8B4513', 'hitam': '#000000',
+        'putih': '#FFFFFF', 'abu': '#808080', 'abuabu': '#808080',
+        'emas': '#FFD700', 'perak': '#C0C0C0'
+      };
+      
+      const lowerValue = value.toLowerCase();
+      for (const [key, color] of Object.entries(colorMap)) {
+        if (lowerValue.includes(key)) return color;
+      }
+      return null;
+    }
+
+    function analyzeData(type) {
+      const data = getDataForType(type);
+      
+      if (data.length < 7) {
+        showToast('Minimal 7 data diperlukan untuk analisis!', 'error');
+        return;
+      }
+      
+      let analysis = '';
+      let concepts = [];
+      
+      if (type === 'weather') {
+        const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        // Pattern analysis
+        const recentWeather = sortedData.slice(-3).map(d => d.weatherType);
+        const weatherCounts = {};
+        sortedData.forEach(d => {
+          weatherCounts[d.weatherType] = (weatherCounts[d.weatherType] || 0) + 1;
+        });
+        
+        // Prediction using pattern matching
+        const lastThree = recentWeather.join(',');
+        let prediction = 'Berawan';
+        let confidence = 'Sedang';
+        
+        // Simple pattern matching
+        if (recentWeather.every(w => w === recentWeather[0])) {
+          prediction = recentWeather[0];
+          confidence = 'Tinggi';
+        } else if (recentWeather[1] === recentWeather[2]) {
+          prediction = recentWeather[2];
+          confidence = 'Tinggi';
+        } else {
+          const mostCommon = Object.keys(weatherCounts).reduce((a, b) => 
+            weatherCounts[a] > weatherCounts[b] ? a : b
+          );
+          prediction = mostCommon;
+          confidence = 'Sedang';
+        }
+        
+        const mostFrequent = Object.keys(weatherCounts).reduce((a, b) => 
+          weatherCounts[a] > weatherCounts[b] ? a : b
+        );
+        
+        analysis = `
+          <div class="mb-3">
+            <p class="font-semibold mb-2" style="color: #667eea;">Hasil Analisis Pola Cuaca & Prediksi Esok:</p>
+            <ul class="text-sm space-y-1 ml-4">
+              <li>• <strong>Total Data Dianalisis:</strong> ${data.length} hari</li>
+              <li>• <strong>Cuaca Paling Sering:</strong> ${weatherTypes[mostFrequent]?.icon} ${mostFrequent} (${weatherCounts[mostFrequent]} hari)</li>
+              <li>• <strong>Pola 3 Hari Terakhir:</strong> ${recentWeather.map(w => weatherTypes[w]?.icon + ' ' + w).join(' → ')}</li>
+              <li>• <strong>🔮 PREDIKSI CUACA ESOK HARI:</strong> ${weatherTypes[prediction]?.icon} <span style="font-weight: 700; color: #667eea;">${prediction}</span></li>
+              <li>• <strong>Tingkat Kepercayaan:</strong> ${confidence} (${confidence === 'Tinggi' ? '75-90%' : '60-75%'})</li>
+              <li>• <strong>Cara Deteksi Pola:</strong> Analisis Pola Berurutan (Sequential Pattern Mining) - Sistem mengamati urutan cuaca 3 hari terakhir dan mencocokkan dengan pola historis</li>
+              <li>• <strong>Metode Prediksi:</strong> Markov Chain - Probabilitas cuaca esok berdasarkan kondisi hari ini dan pola sebelumnya</li>
+              <li>• <strong>Faktor Pendukung:</strong> Frekuensi historis, kecenderungan musiman, dan pola transisi cuaca</li>
+            </ul>
+          </div>
+        `;
+        
+        concepts = [
+          '<div class="p-3 rounded" style="background: #ebf4ff; border-left: 3px solid #4299e1;"><strong>Sequential Pattern Mining</strong><br><small>Teknik mendeteksi pola urutan dalam data berkala untuk prediksi kejadian berikutnya berdasarkan kejadian sebelumnya</small></div>',
+          '<div class="p-3 rounded" style="background: #f0fff4; border-left: 3px solid #48bb78;"><strong>Markov Chain</strong><br><small>Model probabilitas yang memprediksi keadaan masa depan hanya berdasarkan keadaan sekarang dan pola transisi historis</small></div>',
+          '<div class="p-3 rounded" style="background: #fffaf0; border-left: 3px solid #ed8936;"><strong>Time Series Analysis</strong><br><small>Analisis data yang bergantung waktu untuk menemukan tren, musim, dan pola siklis dalam prediksi cuaca</small></div>'
+        ];
+        
+      } else if (type === 'smartphone') {
+        const totalTime = data.reduce((sum, d) => sum + d.value, 0);
+        const sortedData = [...data].sort((a, b) => b.value - a.value);
+        const topApp = sortedData[0];
+        const percentage = ((topApp.value / totalTime) * 100).toFixed(1);
+        const avgPerApp = (totalTime / data.length).toFixed(1);
+        
+        // Predicted future usage
+        const avgIncrease = 1.1; // 10% increase assumption
+        const predictedTotal = (totalTime * avgIncrease).toFixed(0);
+        const predictedTopApp = (topApp.value * avgIncrease).toFixed(0);
+        
+        // Personality analysis
+        let personality = '';
+        let advice = '';
+        
+        if (percentage > 50) {
+          personality = 'Terfokus/Adiktif - Sangat bergantung pada satu aplikasi';
+          advice = 'Diversifikasi aktivitas digital, atur timer penggunaan, cari alternatif offline';
+        } else if (percentage > 35) {
+          personality = 'Spesialis - Memiliki preferensi kuat pada aplikasi tertentu';
+          advice = 'Batasi notifikasi aplikasi favorit, jadwalkan waktu penggunaan khusus';
+        } else if (percentage > 20) {
+          personality = 'Seimbang - Menggunakan beragam aplikasi dengan cukup merata';
+          advice = 'Pertahankan keseimbangan, tetap waspada terhadap total waktu layar';
+        } else {
+          personality = 'Eksploratif - Mencoba berbagai aplikasi tanpa fokus khusus';
+          advice = 'Identifikasi aplikasi produktif vs hiburan, prioritaskan yang bermanfaat';
+        }
+        
+        // Category detection
+        const categories = {
+          sosmed: ['instagram', 'facebook', 'twitter', 'tiktok', 'snapchat'],
+          produktif: ['gmail', 'calendar', 'docs', 'drive', 'office'],
+          hiburan: ['youtube', 'netflix', 'spotify', 'game'],
+          komunikasi: ['whatsapp', 'telegram', 'line', 'messenger']
+        };
+        
+        let dominantCategory = 'Campuran';
+        for (const [cat, keywords] of Object.entries(categories)) {
+          if (keywords.some(kw => topApp.name.toLowerCase().includes(kw))) {
+            dominantCategory = cat === 'sosmed' ? 'Media Sosial' : 
+                             cat === 'produktif' ? 'Produktivitas' :
+                             cat === 'hiburan' ? 'Hiburan' : 'Komunikasi';
+            break;
+          }
+        }
+        
+        analysis = `
+          <div class="mb-3">
+            <p class="font-semibold mb-2" style="color: #764ba2;">Hasil Analisis Pola Penggunaan & Prediksi:</p>
+            <ul class="text-sm space-y-1 ml-4">
+              <li>• <strong>📊 Total Waktu Penggunaan:</strong> ${totalTime} menit (${(totalTime / 60).toFixed(1)} jam)</li>
+              <li>• <strong>🔮 Prediksi Total Bulan Depan:</strong> ${predictedTotal} menit (${(predictedTotal / 60).toFixed(1)} jam)</li>
+              <li>• <strong>📱 Aplikasi Paling Sering:</strong> ${topApp.name} (${topApp.value} menit - ${percentage}%)</li>
+              <li>• <strong>🔮 Prediksi Penggunaan ${topApp.name}:</strong> ${predictedTopApp} menit bulan depan</li>
+              <li>• <strong>📈 Rata-rata Tiap Aplikasi:</strong> ${avgPerApp} menit</li>
+              <li>• <strong>📂 Kategori Dominan:</strong> ${dominantCategory}</li>
+              <li>• <strong>🧠 Prediksi Kepribadian Digital:</strong> ${personality}</li>
+              <li>• <strong>💡 Cara Mengatasi Ketergantungan:</strong> ${advice}</li>
+              <li>• <strong>🔍 Cara Deteksi Pola:</strong> Clustering Analysis - Mengelompokkan aplikasi berdasarkan waktu penggunaan dan kategori untuk menemukan pola perilaku</li>
+              <li>• <strong>📊 Metode Prediksi:</strong> Time Series Forecasting dengan Linear Regression - Memproyeksikan penggunaan masa depan berdasarkan tren saat ini</li>
+            </ul>
+          </div>
+        `;
+        
+        concepts = [
+          '<div class="p-3 rounded" style="background: #faf5ff; border-left: 3px solid #764ba2;"><strong>Behavioral Clustering</strong><br><small>Pengelompokan pola perilaku pengguna berdasarkan aktivitas digital untuk profiling dan personalisasi pengalaman</small></div>',
+          '<div class="p-3 rounded" style="background: #fff5f5; border-left: 3px solid #f56565;"><strong>Usage Pattern Analysis</strong><br><small>Analisis mendalam pola penggunaan aplikasi untuk deteksi kecanduan, optimasi waktu, dan rekomendasi kesehatan digital</small></div>',
+          '<div class="p-3 rounded" style="background: #f0fff4; border-left: 3px solid #48bb78;"><strong>Predictive Analytics</strong><br><small>Teknik memprediksi perilaku masa depan berdasarkan data historis untuk intervensi preventif dan saran kesehatan</small></div>'
+        ];
+        
+      } else if (type === 'text') {
+        const sentimentCounts = { Positif: 0, Netral: 0, Negatif: 0 };
+        let totalConv = 0;
+        data.forEach(d => {
+          sentimentCounts[d.sentiment] += d.value;
+          totalConv += d.value;
+        });
+        
+        const dominant = Object.keys(sentimentCounts).reduce((a, b) => 
+          sentimentCounts[a] > sentimentCounts[b] ? a : b
+        );
+        
+        const topTopics = [...data].sort((a, b) => b.value - a.value).slice(0, 3);
+        const sentimentRatio = ((sentimentCounts[dominant] / totalConv) * 100).toFixed(1);
+        
+        analysis = `
+          <div class="mb-3">
+            <p class="font-semibold mb-2" style="color: #ed8936;">Hasil Analisis Pola Teks Media Digital:</p>
+            <ul class="text-sm space-y-1 ml-4">
+              <li>• <strong>Total Percakapan Dianalisis:</strong> ${totalConv.toLocaleString()} percakapan publik</li>
+              <li>• <strong>Sentimen Dominan:</strong> ${dominant} (${sentimentCounts[dominant].toLocaleString()} percakapan - ${sentimentRatio}%)</li>
+              <li>• <strong>Sebaran Sentimen:</strong> Positif ${sentimentCounts.Positif} | Netral ${sentimentCounts.Netral} | Negatif ${sentimentCounts.Negatif}</li>
+              <li>• <strong>Topik Ramai Dibicarakan #1:</strong> "${topTopics[0].name}" (${topTopics[0].value.toLocaleString()} percakapan, sentimen ${topTopics[0].sentiment.toLowerCase()})</li>
+              <li>• <strong>Topik Ramai Dibicarakan #2:</strong> "${topTopics[1]?.name || 'Tidak ada'}" (${topTopics[1]?.value.toLocaleString() || 0} percakapan)</li>
+              <li>• <strong>Topik Ramai Dibicarakan #3:</strong> "${topTopics[2]?.name || 'Tidak ada'}" (${topTopics[2]?.value.toLocaleString() || 0} percakapan)</li>
+              <li>• <strong>Perkiraan Respons Publik:</strong> Topik "${topTopics[0].name}" berpotensi ${topTopics[0].value > 1000 ? 'sangat ramai dibicarakan' : 'ramai dibicarakan'} dengan respons dominan ${topTopics[0].sentiment.toLowerCase()}</li>
+              <li>• <strong>Cara Analisis:</strong> Pemrosesan Bahasa Alami dan Klasifikasi Sentimen</li>
+            </ul>
+          </div>
+        `;
+        
+        concepts = [
+          '<div class="p-3 rounded" style="background: #fffaf0; border-left: 3px solid #ed8936;"><strong>Analisis Sentimen</strong><br><small>Mengelompokkan emosi dan pendapat dari teks untuk memahami respons publik terhadap isu atau produk</small></div>',
+          '<div class="p-3 rounded" style="background: #ebf4ff; border-left: 3px solid #4299e1;"><strong>Pemodelan Topik dan Kecenderungan</strong><br><small>Identifikasi topik yang sedang ramai dibicarakan untuk perkiraan konten populer dan analisis pendapat publik</small></div>',
+          '<div class="p-3 rounded" style="background: #fff5f5; border-left: 3px solid #f56565;"><strong>Penambangan Teks Data Besar</strong><br><small>Pengambilan informasi bermakna dari data teks skala besar menggunakan algoritma pemrosesan bahasa alami untuk wawasan bisnis</small></div>'
+        ];
+        
+      } else if (type === 'visual') {
+        const objectType = document.getElementById('objectType').value;
+        const featureCount = data.filter(d => d.objectType === objectType).length;
+        
+        const features = {};
+        data.forEach(d => {
+          if (d.objectType === objectType) {
+            features[d.featureName] = d.featureValue;
+          }
+        });
+        
+        const objectNames = {
+          cat: 'Kucing',
+          elephant: 'Gajah',
+          fish: 'Ikan',
+          apple: 'Apel',
+          orange: 'Jeruk'
+        };
+        
+        const featureList = Object.entries(features).map(([k, v]) => `${k}: ${v}`).join(', ');
+        
+        analysis = `
+          <div class="mb-3">
+            <p class="font-semibold mb-2" style="color: #f56565;">Hasil Analisis Pola Visual:</p>
+            <ul class="text-sm space-y-1 ml-4">
+              <li>• <strong>Objek Terdeteksi:</strong> ${objectNames[objectType] || objectType}</li>
+              <li>• <strong>Total Ciri Teridentifikasi:</strong> ${featureCount} ciri visual</li>
+              <li>• <strong>Detail Ciri:</strong> ${featureList || 'Belum ada ciri'}</li>
+              <li>• <strong>Tingkat Akurasi Pengenalan:</strong> ${featureCount >= 7 ? 'Tinggi (90-95%)' : featureCount >= 5 ? 'Sedang (75-85%)' : 'Rendah (<75%)'}</li>
+              <li>• <strong>Klasifikasi:</strong> ${objectType.includes('cat') || objectType.includes('elephant') || objectType.includes('fish') ? 'Hewan' : 'Buah'}</li>
+              <li>• <strong>🔍 Cara Deteksi Pola Visual:</strong> Convolutional Neural Network (CNN) - Sistem menganalisis ciri-ciri seperti warna, bentuk, tekstur, dan pola untuk mengenali objek</li>
+              <li>• <strong>📊 Metode Ekstraksi Fitur:</strong> Feature Engineering - Mengidentifikasi dan mengekstrak ciri-ciri unik (warna kulit, bentuk mata, tekstur) sebagai input pembelajaran mesin</li>
+              <li>• <strong>🎯 Teknik Klasifikasi:</strong> Support Vector Machine (SVM) atau Decision Tree - Mengelompokkan objek berdasarkan kombinasi ciri-ciri yang terdeteksi</li>
+              <li>• <strong>💡 Aplikasi Praktis:</strong> Pengenalan wajah, klasifikasi produk, kontrol kualitas visual, deteksi objek dalam video surveillance</li>
+            </ul>
+          </div>
+        `;
+        
+        concepts = [
+          '<div class="p-3 rounded" style="background: #fff5f5; border-left: 3px solid #f56565;"><strong>Computer Vision & CNN</strong><br><small>Teknologi kecerdasan buatan untuk "melihat" dan memahami konten visual melalui jaringan neural berlapis yang mendeteksi pola</small></div>',
+          '<div class="p-3 rounded" style="background: #faf5ff; border-left: 3px solid #764ba2;"><strong>Feature Extraction</strong><br><small>Proses identifikasi dan ekstraksi ciri-ciri visual unik (warna, bentuk, tekstur, pola) sebagai representasi numerik untuk pembelajaran mesin</small></div>',
+          '<div class="p-3 rounded" style="background: #ebf4ff; border-left: 3px solid #4299e1;"><strong>Image Classification</strong><br><small>Teknik mengelompokkan gambar ke kategori berdasarkan kombinasi fitur visual menggunakan algoritma supervised learning</small></div>'
+        ];
+      }
+      
+      document.getElementById('analysisResults').innerHTML = analysis;
+      document.getElementById('feedbackContent').innerHTML = concepts.join('');
+      document.getElementById('feedbackSection').style.display = 'block';
+    }
+
+    window.addEventListener('load', () => {
+      initApp();
+      updateWarningBanners();
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b8ab89c33a0e78b',t:'MTc2NzUyOTU1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

@@ -175,7 +175,7 @@
      <div class="bg-white rounded-lg shadow-lg p-4"><!-- Weather Tab Content -->
       <div id="content-weather" class="tab-content">
        <div class="warning-banner" id="warning-weather">
-        <p class="text-sm font-semibold text-yellow-800">Minimal 7 data diperlukan untuk visualisasi dan prediksi!</p>
+        <p class="text-sm font-semibold text-yellow-800">Minimal tujuh data diperlukan untuk visualisasi dan prediksi!</p>
         <p class="text-xs text-yellow-700 mt-1">Saat ini: <span id="count-weather">0</span> data</p>
        </div>
        <h2 id="weather-label" class="font-bold mb-3 flex items-center justify-between" style="font-size: 18px; color: #667eea;"><span>Pola Data Cuaca</span>
@@ -192,14 +192,14 @@
          </thead>
          <tbody id="weatherDataTable"></tbody>
         </table>
-       </div><button onclick="analyzeData('weather')" class="w-full py-2 rounded text-white font-semibold" style="background: #667eea;"> Analisis Pola &amp; Prediksi Esok </button>
+       </div><button onclick="analyzeData('weather')" class="w-full py-2 rounded text-white font-semibold" style="background: #667eea;"> Analisis Pola dan Prediksi Esok </button>
       </div><!-- Smartphone Tab Content -->
       <div id="content-smartphone" class="tab-content" style="display: none;">
        <div class="warning-banner" id="warning-smartphone">
-        <p class="text-sm font-semibold text-yellow-800">Minimal 7 data diperlukan untuk visualisasi dan analisis!</p>
+        <p class="text-sm font-semibold text-yellow-800">Minimal tujuh data diperlukan untuk visualisasi dan analisis!</p>
         <p class="text-xs text-yellow-700 mt-1">Saat ini: <span id="count-smartphone">0</span> data</p>
        </div>
-       <h2 id="smartphone-label" class="font-bold mb-3 flex items-center justify-between" style="font-size: 18px; color: #764ba2;"><span>Pola Penggunaan Gawai Pintar</span>
+       <h2 id="smartphone-label" class="font-bold mb-3 flex items-center justify-between" style="font-size: 18px; color: #764ba2;"><span>Pola Penggunaan <i>Smartphone</i></span>
         <div class="flex gap-2"><button onclick="resetData('smartphone')" class="text-sm px-3 py-1 rounded text-white" style="background: #f56565;">🗑️ Reset</button> <button onclick="showAddModal('smartphone')" class="text-sm px-3 py-1 rounded text-white" style="background: #48bb78;">+ Data</button>
         </div></h2>
        <div class="mb-3 overflow-auto" style="max-height: 180px;">
@@ -213,11 +213,11 @@
          </thead>
          <tbody id="smartphoneDataTable"></tbody>
         </table>
-       </div><button onclick="analyzeData('smartphone')" class="w-full py-2 rounded text-white font-semibold" style="background: #764ba2;"> Analisis Pola &amp; Prediksi </button>
+       </div><button onclick="analyzeData('smartphone')" class="w-full py-2 rounded text-white font-semibold" style="background: #764ba2;"> Analisis Pola dan Prediksi </button>
       </div><!-- Text Tab Content -->
       <div id="content-text" class="tab-content" style="display: none;">
        <div class="warning-banner" id="warning-text">
-        <p class="text-sm font-semibold text-yellow-800">Minimal 7 data diperlukan untuk visualisasi dan analisis!</p>
+        <p class="text-sm font-semibold text-yellow-800">Minimal tujuh data diperlukan untuk visualisasi dan analisis!</p>
         <p class="text-xs text-yellow-700 mt-1">Saat ini: <span id="count-text">0</span> data</p>
        </div>
        <h2 id="text-label" class="font-bold mb-3 flex items-center justify-between" style="font-size: 18px; color: #ed8936;"><span>Pola Teks Media Digital</span>
@@ -235,11 +235,11 @@
          </thead>
          <tbody id="textDataTable"></tbody>
         </table>
-       </div><button onclick="analyzeData('text')" class="w-full py-2 rounded text-white font-semibold" style="background: #ed8936;"> Analisis Sentimen &amp; Topik </button>
+       </div><button onclick="analyzeData('text')" class="w-full py-2 rounded text-white font-semibold" style="background: #ed8936;"> Analisis Sentimen dan Topik </button>
       </div><!-- Visual Tab Content -->
       <div id="content-visual" class="tab-content" style="display: none;">
        <div class="warning-banner" id="warning-visual">
-        <p class="text-sm font-semibold text-yellow-800">Minimal 7 ciri diperlukan untuk membentuk gambar!</p>
+        <p class="text-sm font-semibold text-yellow-800">Minimal tujuh ciri diperlukan untuk membentuk gambar!</p>
         <p class="text-xs text-yellow-700 mt-1">Saat ini: <span id="count-visual">0</span> ciri</p>
        </div>
        <h2 id="pattern-label" class="font-bold mb-3 flex items-center justify-between" style="font-size: 18px; color: #f56565;"><span>Pola Visual Objek</span>
@@ -263,7 +263,7 @@
       <h3 class="font-bold mb-3" style="font-size: 18px; color: #2d3748;">Visualisasi &amp; Analisis</h3><!-- Chart Container -->
       <div id="chartContainer" class="mb-3" style="height: 220px;">
        <div class="flex items-center justify-center h-full text-gray-500">
-        <p class="text-center text-sm">Tambahkan minimal 7 data dan klik "Analisis"<br>
+        <p class="text-center text-sm">Tambahkan minimal tujuh data dan klik "Analisis"<br>
          untuk melihat visualisasi</p>
        </div>
       </div><!-- Analysis Results -->
@@ -320,7 +320,7 @@
       main_title: "Mengenali Pola Data untuk Membuat Prediksi",
       subtitle: "Kelas 12 SMA - Koding dan Kecerdasan Artifisial",
       weather_label: "Pola Data Cuaca",
-      smartphone_label: "Pola Penggunaan Smartphone",
+      smartphone_label: "Pola Penggunaan <i>Smartphone</i>",
       text_label: "Pola Teks Media Digital",
       pattern_label: "Pola Visual Objek",
       primary_color: "#667eea",
@@ -743,7 +743,7 @@
     async function deleteData(record) {
       if (isLoading) return;
       
-      const confirmed = await showConfirmation('Apakah Anda yakin ingin menghapus data ini?');
+      const confirmed = await showConfirmation('Apakah kamu yakin ingin menghapus data ini?');
       if (!confirmed) return;
       
       isLoading = true;
@@ -778,7 +778,7 @@
         visual: 'Visual Objek'
       };
       
-      const confirmed = await showConfirmation(`Apakah Anda yakin ingin menghapus SEMUA data ${typeNames[type]}? Tindakan ini tidak dapat dibatalkan!`);
+      const confirmed = await showConfirmation(`Apakah kamu yakin ingin menghapus semua data ${typeNames[type]}? Tindakan ini tidak dapat dibatalkan!`);
       if (!confirmed) return;
       
       isLoading = true;
@@ -1227,7 +1227,7 @@
       const data = getDataForType(type);
       
       if (data.length < 7) {
-        showToast('Minimal 7 data diperlukan untuk analisis!', 'error');
+        showToast('Minimal tujuh data diperlukan untuk analisis!', 'error');
         return;
       }
       
@@ -1270,24 +1270,24 @@
         
         analysis = `
           <div class="mb-3">
-            <p class="font-semibold mb-2" style="color: #667eea;">Hasil Analisis Pola Cuaca & Prediksi Esok:</p>
+            <p class="font-semibold mb-2" style="color: #667eea;">Hasil Analisis Pola Cuaca dan Prediksi Esok:</p>
             <ul class="text-sm space-y-1 ml-4">
               <li>• <strong>Total Data Dianalisis:</strong> ${data.length} hari</li>
               <li>• <strong>Cuaca Paling Sering:</strong> ${weatherTypes[mostFrequent]?.icon} ${mostFrequent} (${weatherCounts[mostFrequent]} hari)</li>
               <li>• <strong>Pola 3 Hari Terakhir:</strong> ${recentWeather.map(w => weatherTypes[w]?.icon + ' ' + w).join(' → ')}</li>
-              <li>• <strong>🔮 PREDIKSI CUACA ESOK HARI:</strong> ${weatherTypes[prediction]?.icon} <span style="font-weight: 700; color: #667eea;">${prediction}</span></li>
+              <li>• <strong>Prediksi Cuaca Esok Hari:</strong> ${weatherTypes[prediction]?.icon} <span style="font-weight: 700; color: #667eea;">${prediction}</span></li>
               <li>• <strong>Tingkat Kepercayaan:</strong> ${confidence} (${confidence === 'Tinggi' ? '75-90%' : '60-75%'})</li>
-              <li>• <strong>Cara Deteksi Pola:</strong> Analisis Pola Berurutan (Sequential Pattern Mining) - Sistem mengamati urutan cuaca 3 hari terakhir dan mencocokkan dengan pola historis</li>
-              <li>• <strong>Metode Prediksi:</strong> Markov Chain - Probabilitas cuaca esok berdasarkan kondisi hari ini dan pola sebelumnya</li>
-              <li>• <strong>Faktor Pendukung:</strong> Frekuensi historis, kecenderungan musiman, dan pola transisi cuaca</li>
+              <li>• <strong>Cara Deteksi Pola:</strong> analisis pola berurutan (<i>sequential pattern mining</i>), yaitu sistem mengamati urutan cuaca 3 hari terakhir dan mencocokkan dengan pola historis</li>
+              <li>• <strong>Metode Prediksi:</strong> <i>markov chain probabilitas</i> cuaca esok berdasarkan kondisi hari ini dan pola sebelumnya</li>
+              <li>• <strong>Faktor Pendukung:</strong> <i>frekuensi</i> historis, kecenderungan musim, dan pola transisi cuaca</li>
             </ul>
           </div>
         `;
         
         concepts = [
-          '<div class="p-3 rounded" style="background: #ebf4ff; border-left: 3px solid #4299e1;"><strong>Sequential Pattern Mining</strong><br><small>Teknik mendeteksi pola urutan dalam data berkala untuk prediksi kejadian berikutnya berdasarkan kejadian sebelumnya</small></div>',
-          '<div class="p-3 rounded" style="background: #f0fff4; border-left: 3px solid #48bb78;"><strong>Markov Chain</strong><br><small>Model probabilitas yang memprediksi keadaan masa depan hanya berdasarkan keadaan sekarang dan pola transisi historis</small></div>',
-          '<div class="p-3 rounded" style="background: #fffaf0; border-left: 3px solid #ed8936;"><strong>Time Series Analysis</strong><br><small>Analisis data yang bergantung waktu untuk menemukan tren, musim, dan pola siklis dalam prediksi cuaca</small></div>'
+          '<div class="p-3 rounded" style="background: #ebf4ff; border-left: 3px solid #4299e1;"><strong><i>Sequential Pattern Mining</i></strong><br><small>Teknik mendeteksi pola urutan dalam data berkala untuk prediksi kejadian berikutnya berdasarkan kejadian sebelumnya</small></div>',
+          '<div class="p-3 rounded" style="background: #f0fff4; border-left: 3px solid #48bb78;"><strong><i>Markov Chain</i></strong><br><small>Model probabilitas yang memprediksi keadaan masa depan hanya berdasarkan keadaan sekarang dan pola transisi historis</small></div>',
+          '<div class="p-3 rounded" style="background: #fffaf0; border-left: 3px solid #ed8936;"><strong><i>Time Series Analysis</i></strong><br><small>Analisis data yang bergantung waktu untuk menemukan tren, musim, dan pola siklis dalam prediksi cuaca</small></div>'
         ];
         
       } else if (type === 'smartphone') {
@@ -1307,17 +1307,17 @@
         let advice = '';
         
         if (percentage > 50) {
-          personality = 'Terfokus/Adiktif - Sangat bergantung pada satu aplikasi';
-          advice = 'Diversifikasi aktivitas digital, atur timer penggunaan, cari alternatif offline';
+          personality = 'Terfokus/Adiktif: Sangat bergantung pada satu aplikasi';
+          advice = 'Diversifikasi aktivitas digital, atur waktu penggunaan, cari alternatif <i>offline</i>';
         } else if (percentage > 35) {
-          personality = 'Spesialis - Memiliki preferensi kuat pada aplikasi tertentu';
-          advice = 'Batasi notifikasi aplikasi favorit, jadwalkan waktu penggunaan khusus';
+          personality = 'Spesialis: Memiliki preferensi kuat pada aplikasi tertentu';
+          advice = 'Batasi notifikasi aplikasi favorit, jadwalkan waktu penggunaan secara khusus';
         } else if (percentage > 20) {
-          personality = 'Seimbang - Menggunakan beragam aplikasi dengan cukup merata';
+          personality = 'Seimbang: Menggunakan beragam aplikasi dengan cukup merata';
           advice = 'Pertahankan keseimbangan, tetap waspada terhadap total waktu layar';
         } else {
-          personality = 'Eksploratif - Mencoba berbagai aplikasi tanpa fokus khusus';
-          advice = 'Identifikasi aplikasi produktif vs hiburan, prioritaskan yang bermanfaat';
+          personality = 'Eksploratif: Mencoba berbagai aplikasi tanpa fokus khusus';
+          advice = 'Identifikasi aplikasi produktif dengan hiburan, prioritaskan yang bermanfaat';
         }
         
         // Category detection
@@ -1340,7 +1340,7 @@
         
         analysis = `
           <div class="mb-3">
-            <p class="font-semibold mb-2" style="color: #764ba2;">Hasil Analisis Pola Penggunaan & Prediksi:</p>
+            <p class="font-semibold mb-2" style="color: #764ba2;">Hasil Analisis Pola Penggunaan dan Prediksi:</p>
             <ul class="text-sm space-y-1 ml-4">
               <li>• <strong>📊 Total Waktu Penggunaan:</strong> ${totalTime} menit (${(totalTime / 60).toFixed(1)} jam)</li>
               <li>• <strong>🔮 Prediksi Total Bulan Depan:</strong> ${predictedTotal} menit (${(predictedTotal / 60).toFixed(1)} jam)</li>
@@ -1348,18 +1348,18 @@
               <li>• <strong>🔮 Prediksi Penggunaan ${topApp.name}:</strong> ${predictedTopApp} menit bulan depan</li>
               <li>• <strong>📈 Rata-rata Tiap Aplikasi:</strong> ${avgPerApp} menit</li>
               <li>• <strong>📂 Kategori Dominan:</strong> ${dominantCategory}</li>
-              <li>• <strong>🧠 Prediksi Kepribadian Digital:</strong> ${personality}</li>
+              <li>• <strong> Prediksi Kepribadian Digital:</strong> ${personality}</li>
               <li>• <strong>💡 Cara Mengatasi Ketergantungan:</strong> ${advice}</li>
-              <li>• <strong>🔍 Cara Deteksi Pola:</strong> Clustering Analysis - Mengelompokkan aplikasi berdasarkan waktu penggunaan dan kategori untuk menemukan pola perilaku</li>
-              <li>• <strong>📊 Metode Prediksi:</strong> Time Series Forecasting dengan Linear Regression - Memproyeksikan penggunaan masa depan berdasarkan tren saat ini</li>
+              <li>• <strong>🔍 Cara Deteksi Pola:</strong> <i>clustering analysis</i>, yaitu mengelompokkan aplikasi berdasarkan waktu penggunaan dan kategori untuk menemukan pola perilaku</li>
+              <li>• <strong>📊 Metode Prediksi:</strong> <i>time series forecasting</i> dengan <i>linear regression</i> untuk memproyeksikan penggunaan masa depan berdasarkan tren saat ini</li>
             </ul>
           </div>
         `;
         
         concepts = [
-          '<div class="p-3 rounded" style="background: #faf5ff; border-left: 3px solid #764ba2;"><strong>Behavioral Clustering</strong><br><small>Pengelompokan pola perilaku pengguna berdasarkan aktivitas digital untuk profiling dan personalisasi pengalaman</small></div>',
-          '<div class="p-3 rounded" style="background: #fff5f5; border-left: 3px solid #f56565;"><strong>Usage Pattern Analysis</strong><br><small>Analisis mendalam pola penggunaan aplikasi untuk deteksi kecanduan, optimasi waktu, dan rekomendasi kesehatan digital</small></div>',
-          '<div class="p-3 rounded" style="background: #f0fff4; border-left: 3px solid #48bb78;"><strong>Predictive Analytics</strong><br><small>Teknik memprediksi perilaku masa depan berdasarkan data historis untuk intervensi preventif dan saran kesehatan</small></div>'
+          '<div class="p-3 rounded" style="background: #faf5ff; border-left: 3px solid #764ba2;"><strong><i>Behavioral Clustering</i></strong><br><small>Pengelompokan pola perilaku pengguna berdasarkan aktivitas digital untuk profiling dan personalisasi pengalaman</small></div>',
+          '<div class="p-3 rounded" style="background: #fff5f5; border-left: 3px solid #f56565;"><strong><i>Usage Pattern Analysis</i></strong><br><small>Analisis mendalam pola penggunaan aplikasi untuk deteksi kecanduan, optimasi waktu, dan rekomendasi kesehatan digital</small></div>',
+          '<div class="p-3 rounded" style="background: #f0fff4; border-left: 3px solid #48bb78;"><strong><i>Predictive Analytics</i></strong><br><small>Teknik memprediksi perilaku masa depan berdasarkan data historis untuk intervensi preventif dan saran kesehatan</small></div>'
         ];
         
       } else if (type === 'text') {
@@ -1385,10 +1385,10 @@
               <li>• <strong>Sentimen Dominan:</strong> ${dominant} (${sentimentCounts[dominant].toLocaleString()} percakapan - ${sentimentRatio}%)</li>
               <li>• <strong>Sebaran Sentimen:</strong> Positif ${sentimentCounts.Positif} | Netral ${sentimentCounts.Netral} | Negatif ${sentimentCounts.Negatif}</li>
               <li>• <strong>Topik Ramai Dibicarakan #1:</strong> "${topTopics[0].name}" (${topTopics[0].value.toLocaleString()} percakapan, sentimen ${topTopics[0].sentiment.toLowerCase()})</li>
-              <li>• <strong>Topik Ramai Dibicarakan #2:</strong> "${topTopics[1]?.name || 'Tidak ada'}" (${topTopics[1]?.value.toLocaleString() || 0} percakapan)</li>
-              <li>• <strong>Topik Ramai Dibicarakan #3:</strong> "${topTopics[2]?.name || 'Tidak ada'}" (${topTopics[2]?.value.toLocaleString() || 0} percakapan)</li>
-              <li>• <strong>Perkiraan Respons Publik:</strong> Topik "${topTopics[0].name}" berpotensi ${topTopics[0].value > 1000 ? 'sangat ramai dibicarakan' : 'ramai dibicarakan'} dengan respons dominan ${topTopics[0].sentiment.toLowerCase()}</li>
-              <li>• <strong>Cara Analisis:</strong> Pemrosesan Bahasa Alami dan Klasifikasi Sentimen</li>
+              <li>• <strong>Topik Ramai Dibicarakan #2:</strong> "${topTopics[1]?.name || 'tidak ada'}" (${topTopics[1]?.value.toLocaleString() || 0} percakapan)</li>
+              <li>• <strong>Topik Ramai Dibicarakan #3:</strong> "${topTopics[2]?.name || 'tidak ada'}" (${topTopics[2]?.value.toLocaleString() || 0} percakapan)</li>
+              <li>• <strong>Perkiraan Respons Publik:</strong> Topik "${topTopics[0].name}" berpotensi ${topTopics[0].value > 1000 ? 'sangat ramai dibicarakan' : 'ramai dibicarakan'} dengan respons yang jumlahnya cukup banyak, yaitu ${topTopics[0].sentiment.toLowerCase()}</li>
+              <li>• <strong>Cara Analisis:</strong> pemrosesan bahasa alami dan klasifikasi sentimen</li>
             </ul>
           </div>
         `;
@@ -1427,20 +1427,20 @@
               <li>• <strong>Objek Terdeteksi:</strong> ${objectNames[objectType] || objectType}</li>
               <li>• <strong>Total Ciri Teridentifikasi:</strong> ${featureCount} ciri visual</li>
               <li>• <strong>Detail Ciri:</strong> ${featureList || 'Belum ada ciri'}</li>
-              <li>• <strong>Tingkat Akurasi Pengenalan:</strong> ${featureCount >= 7 ? 'Tinggi (90-95%)' : featureCount >= 5 ? 'Sedang (75-85%)' : 'Rendah (<75%)'}</li>
-              <li>• <strong>Klasifikasi:</strong> ${objectType.includes('cat') || objectType.includes('elephant') || objectType.includes('fish') ? 'Hewan' : 'Buah'}</li>
-              <li>• <strong>🔍 Cara Deteksi Pola Visual:</strong> Convolutional Neural Network (CNN) - Sistem menganalisis ciri-ciri seperti warna, bentuk, tekstur, dan pola untuk mengenali objek</li>
-              <li>• <strong>📊 Metode Ekstraksi Fitur:</strong> Feature Engineering - Mengidentifikasi dan mengekstrak ciri-ciri unik (warna kulit, bentuk mata, tekstur) sebagai input pembelajaran mesin</li>
-              <li>• <strong>🎯 Teknik Klasifikasi:</strong> Support Vector Machine (SVM) atau Decision Tree - Mengelompokkan objek berdasarkan kombinasi ciri-ciri yang terdeteksi</li>
-              <li>• <strong>💡 Aplikasi Praktis:</strong> Pengenalan wajah, klasifikasi produk, kontrol kualitas visual, deteksi objek dalam video surveillance</li>
+              <li>• <strong>Tingkat Akurasi Pengenalan:</strong> ${featureCount >= 7 ? 'tinggi (90-95%)' : featureCount >= 5 ? 'sedang (75-85%)' : 'rendah (<75%)'}</li>
+              <li>• <strong>Klasifikasi:</strong> ${objectType.includes('cat') || objectType.includes('elephant') || objectType.includes('fish') ? 'hewan' : 'buah'}</li>
+              <li>• <strong>🔍 Cara Deteksi Pola Visual:</strong> <i>Convolutional Neural Network</i> (CNN), yaitu sistem menganalisis ciri-ciri, seperti warna, bentuk, tekstur, dan pola untuk mengenali objek</li>
+              <li>• <strong>📊 Metode Ekstraksi Fitur:</strong> <i>Feature Engineering</i>, yaitu mengidentifikasi dan mengekstrak ciri-ciri unik, seperti warna kulit, bentuk mata, tekstur sebagai <i>input</i> pembelajaran mesin</li>
+              <li>• <strong>🎯 Teknik Klasifikasi:</strong> <i>Support Vector Machine</i> (SVM) atau <i>decision tree</i>, yaitu mengelompokkan objek berdasarkan kombinasi ciri-ciri yang terdeteksi</li>
+              <li>• <strong>💡 Implementasi pada Aplikasi:</strong> pengenalan wajah, klasifikasi produk, kontrol kualitas visual, deteksi objek dalam video CCTV</li>
             </ul>
           </div>
         `;
         
         concepts = [
-          '<div class="p-3 rounded" style="background: #fff5f5; border-left: 3px solid #f56565;"><strong>Computer Vision & CNN</strong><br><small>Teknologi kecerdasan buatan untuk "melihat" dan memahami konten visual melalui jaringan neural berlapis yang mendeteksi pola</small></div>',
-          '<div class="p-3 rounded" style="background: #faf5ff; border-left: 3px solid #764ba2;"><strong>Feature Extraction</strong><br><small>Proses identifikasi dan ekstraksi ciri-ciri visual unik (warna, bentuk, tekstur, pola) sebagai representasi numerik untuk pembelajaran mesin</small></div>',
-          '<div class="p-3 rounded" style="background: #ebf4ff; border-left: 3px solid #4299e1;"><strong>Image Classification</strong><br><small>Teknik mengelompokkan gambar ke kategori berdasarkan kombinasi fitur visual menggunakan algoritma supervised learning</small></div>'
+          '<div class="p-3 rounded" style="background: #fff5f5; border-left: 3px solid #f56565;"><strong><i>Computer Vision</i> atau CNN</strong><br><small>Teknologi kecerdasan artifisial untuk mengetahui dan memahami konten visual melalui jaringan neural berlapis yang mendeteksi pola</small></div>',
+          '<div class="p-3 rounded" style="background: #faf5ff; border-left: 3px solid #764ba2;"><strong><i>Feature Extraction</i></strong><br><small>Proses identifikasi dan ekstraksi ciri-ciri visual unik, seperti warna, bentuk, tekstur, pola sebagai representasi numerik untuk pembelajaran mesin</small></div>',
+          '<div class="p-3 rounded" style="background: #ebf4ff; border-left: 3px solid #4299e1;"><strong><i>Image Classification</i></strong><br><small>Teknik mengelompokkan gambar ke kategori berdasarkan kombinasi fitur visual menggunakan algoritma <i>supervised learning</i></small></div>'
         ];
       }
       
